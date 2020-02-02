@@ -1,0 +1,5 @@
+{
+  "name": "database source",
+  "class": "top.lcmatrix.util.codegenerator.plugin.dbsource.DbSourcePlugin",
+  "version": 1.0
+}
