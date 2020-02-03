@@ -27,7 +27,7 @@ public class JarLoader {
 	        URL url = jarFile.toURI().toURL();
 	        method.invoke(classLoader, url);
 	    } catch (SecurityException e) {
-	        e.printStackTrace();
+	        throw e;
 	    } catch (MalformedURLException e) {
 	    	throw new RuntimeException("Incorrect jar file.");
 		} catch (IllegalAccessException e) {

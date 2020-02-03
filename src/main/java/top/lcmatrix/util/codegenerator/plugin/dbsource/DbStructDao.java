@@ -8,8 +8,11 @@ import org.jumpmind.db.platform.JdbcDatabasePlatformFactory;
 import top.lcmatrix.util.codegenerator.plugin.dbsource.util.AsteriskExp;
 import top.lcmatrix.util.codegenerator.plugin.dbsource.util.JarLoader;
 
+import java.sql.Driver;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
 
 public class DbStructDao {
 
@@ -22,21 +25,29 @@ public class DbStructDao {
 				&& StringUtils.isNotBlank(inputModel.getJdbcDriverJar().getName())
 				&& !"Mysql".equalsIgnoreCase(inputModel.getJdbcDriverJar().getName())) {
 			JarLoader.loadLocalJar(inputModel.getJdbcDriverJar().getAbsolutePath());
-		}else{
+            reloadDrivers();
+        }else{
 			loadMysqlDriver();
 		}
-		ds = new HikariDataSource();
-		ds.setJdbcUrl(inputModel.getJdbcUrl());
-		ds.setUsername(inputModel.getUserName());
-		ds.setPassword(inputModel.getPassword());
-		ds.setConnectionTimeout(5000);
-		ds.setMaximumPoolSize(5);
+		try {
+			ds = new HikariDataSource();
+			ds.setJdbcUrl(inputModel.getJdbcUrl());
+			ds.setUsername(inputModel.getUserName());
+			ds.setPassword(inputModel.getPassword());
+			ds.setConnectionTimeout(5000);
+			ds.setMaximumPoolSize(5);
 //		ds.setIdleTimeout(30000);
-		platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, null, false, true);
-		if(platform == null) {
-			throw new RuntimeException("Unsuportted database!");
+			platform = JdbcDatabasePlatformFactory.createNewPlatformInstance(ds, null, false, true);
+			if(platform == null) {
+				throw new RuntimeException("Unsuportted database!");
+			}
+			allTableNames = platform.readTableNamesFromDatabase(null, null, null);
+		} catch (Exception e) {
+			if(ds != null){
+				ds.close();
+			}
+			throw e;
 		}
-		allTableNames = platform.readTableNamesFromDatabase(null, null, null);
 	}
 
 	private void loadMysqlDriver() {
@@ -46,6 +57,14 @@ public class DbStructDao {
 			ex.printStackTrace();
 		}
 	}
+
+    private void reloadDrivers() {
+        ServiceLoader<Driver> loadedDrivers = ServiceLoader.load(Driver.class);
+        Iterator<Driver> driversIterator = loadedDrivers.iterator();
+        while (driversIterator.hasNext()){
+            driversIterator.next();
+        }
+    }
 
 	public List<Table> getTableModels(String tableNameExp){
 		List<Table> tables = new ArrayList<>();
