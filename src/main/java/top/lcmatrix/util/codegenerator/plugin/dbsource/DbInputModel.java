@@ -8,7 +8,7 @@ import java.io.File;
 @Data
 public class DbInputModel {
 
-    @InputField(label = "jdbc driver jar ( Mysql is built-in supported,just leave it empty when using Mysql. )",
+    @InputField(label = "jdbc driver jar (jre8) ( Mysql is built-in supported,just leave it empty when using Mysql. )",
      fileSelectionMode = InputField.FILE_SELECTION_MODE_FILES_ONLY, allowFileSuffixes = ".jar", defaultValue = "Mysql")
     private File jdbcDriverJar;
 
